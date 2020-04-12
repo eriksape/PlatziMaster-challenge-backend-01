@@ -1,12 +1,12 @@
 version: "3.7"
 
 services: 
-    app:
-        container_name: app_challenge_backend_01
+    consumer:
+        container_name: consumer_challenge_backend_01
         image: node:12-alpine
         working_dir: /var/www
         volumes: 
-            - ./app:/var/www
+            - ./consumer:/var/www
         command: /bin/sh -c "sleep 30 && npm install && npm run dev"
         ports:
             - 3000:3000
