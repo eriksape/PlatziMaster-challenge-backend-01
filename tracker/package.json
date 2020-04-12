@@ -1,7 +1,7 @@
 {
-  "name": "challenge-backend-01-app",
+  "name": "challenge-backend-01-tracker",
   "version": "0.0.0",
-  "description": "backend challenge from platzi master",
+  "description": "Twitter tracker and producing messages to Rabbitmq",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
