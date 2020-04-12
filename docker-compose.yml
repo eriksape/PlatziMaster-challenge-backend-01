@@ -1,0 +1,44 @@
+version: "3.7"
+
+services: 
+    app:
+        container_name: app_challenge_backend_01
+        image: node:12-alpine
+        working_dir: /var/www
+        volumes: 
+            - ./app:/var/www
+        command: /bin/sh -c "sleep 30 && npm install && npm run dev"
+        ports:
+            - 3000:3000
+    tracker:
+        container_name: tracker_challenge_backend_01
+        image: node:12-alpine
+        image: node:12-alpine
+        working_dir: /var/www
+        volumes: 
+            - ./tracker:/var/www
+        command: /bin/sh -c "sleep 30 && npm install && npm run dev"
+        depends_on: 
+            - rabbitmq
+    redis:
+        container_name: redis_challenge_backend_01
+        image: redis:alpine
+        command: redis-server
+        ports:
+            - 6379:6379
+        volumes:
+            - redis-data:/var/lib/redis
+        environment:
+            - REDIS_REPLICATION_MODE=master
+    rabbitmq:
+        container_name: rabbitmq_challenge_backend_01
+        image: rabbitmq:management-alpine
+        ports:
+            # The standard AMQP protocol port
+            - '5672:5672'
+            # HTTP management UI
+            - '15672:15672'
+        
+volumes: 
+    mongo_challenge_backend_01:
+    redis-data:
