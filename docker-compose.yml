@@ -1,15 +1,22 @@
 version: "3.7"
 
 services: 
+    app:
+        container_name: app_challenge_backend_01
+        image: node:12-alpine
+        working_dir: /var/www
+        volumes: 
+            - ./app:/var/www
+        command: /bin/sh -c "npm install && npm run dev"
+        ports:
+            - 3000:3000
     consumer:
         container_name: consumer_challenge_backend_01
         image: node:12-alpine
         working_dir: /var/www
         volumes: 
             - ./consumer:/var/www
-        command: /bin/sh -c "sleep 30 && npm install && npm run dev"
-        ports:
-            - 3000:3000
+        command: /bin/sh -c "sleep 20 && npm install && npm run dev"
     tracker:
         container_name: tracker_challenge_backend_01
         image: node:12-alpine
@@ -17,7 +24,7 @@ services:
         working_dir: /var/www
         volumes: 
             - ./tracker:/var/www
-        command: /bin/sh -c "sleep 30 && npm install && npm run dev"
+        command: /bin/sh -c "sleep 20 && npm install && npm run dev"
         depends_on: 
             - rabbitmq
     redis:
@@ -27,7 +34,7 @@ services:
         ports:
             - 6379:6379
         volumes:
-            - redis-data:/var/lib/redis
+            - redis-data:/data
         environment:
             - REDIS_REPLICATION_MODE=master
     rabbitmq:
@@ -40,5 +47,4 @@ services:
             - '15672:15672'
         
 volumes: 
-    mongo_challenge_backend_01:
     redis-data:

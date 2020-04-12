@@ -1,0 +1,19 @@
+{
+  "name": "challenge-backend-01-app",
+  "version": "0.0.0",
+  "description": "backend challenge from platzi master",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "nodemon ./index.js"
+  },
+  "author": "eriksape",
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.17.1",
+    "ioredis": "^4.16.2"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.3"
+  }
+}
