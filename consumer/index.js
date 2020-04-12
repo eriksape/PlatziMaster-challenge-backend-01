@@ -1,17 +1,18 @@
 const amqp = require('amqplib/callback_api');
-const redis = require("redis");
+const Redis = require("ioredis");
+const redis = new Redis({
+  host: 'redis'
+});
+
+const keywords = [
+  'platzi',
+  'opensource',
+  'node'
+];
 
 function decode_utf8(s) {
   return decodeURIComponent(escape(s));
 }
-
-const client = redis.createClient({
-  host: 'redis'
-});
-      
-client.on("error", function(error) {
-  console.error(error);
-});
 
 amqp.connect('amqp://rabbitmq', function(error0, connection) {
   if (error0) {
@@ -21,23 +22,25 @@ amqp.connect('amqp://rabbitmq', function(error0, connection) {
     if (error1) {
       throw error1;
     }
-    var queue = 'twit/hola';
 
-    channel.assertQueue(queue, {
-      durable: false
-    });
+    for(let keyword in keywords)
+    {
+      const queue = `twit/${keywords[keyword]}`;
 
-    
-    console.log(" [*] Waiting for messages in %s. To exit press CTRL+C", queue);
-    channel.consume(queue, function(msg) {
-      const tweet = JSON.parse(decode_utf8(msg.content.toString()))
-      console.log(" [x] Received %s", tweet.text);
-      client.set("tweet", JSON.stringify(tweet), redis.print);
-
-    }, {
-        noAck: true
+      channel.assertQueue(queue, {
+        durable: false
       });
-
+      console.log(" [*] Waiting for messages in %s. To exit press CTRL+C", queue);
+      channel.consume(queue, function(msg) {
+        const tweet = JSON.parse(decode_utf8(msg.content.toString()));
+        console.log(" [x] Received %s", tweet.id);
+        redis.rpush('tweets', JSON.stringify(tweet)).then(index => {
+          redis.hset('hashtweets', `${tweet.keyword}_${tweet.id}`, index);
+        });
+      }, {
+          noAck: true
+      });
+    }
 
   });
 });
