@@ -16,23 +16,54 @@ app.get('/tweets', async (req, res) => {
         const Redis = require('ioredis');
         const redis = new Redis({host: 'redis'});
 
-        const tweets = (await redis.lrange('tweets', from - 1, to -1)).map(tweet => JSON.parse(tweet));
-        const total = await redis.llen('tweets');
-        const last_page = Math.ceil(total/15);
+        if(typeof req.query.keyword === "undefined") {
+            const tweets = (await redis.lrange('tweets', from - 1, to -1)).map(tweet => JSON.parse(tweet));
+            const total = await redis.llen('tweets');
+            const last_page = Math.ceil(total/per_page);
+    
+            res.json({
+                total,
+                per_page,
+                current_page,
+                last_page,
+                first_page_url: `${fullUrl}?page=1`,
+                last_page_url: `${fullUrl}?page=${last_page}`,
+                next_page_url: current_page < last_page ? `${fullUrl}?page=${current_page + 1}` : null,
+                prev_page_url: current_page > 1 ? `${fullUrl}?page=${current_page - 1}` : null,
+                from,
+                to,
+                data: tweets,
+            });
+        }
+        else if(req.query.keyword && ['platzi','opensource', 'node'].includes(req.query.keyword)) {
+            const id_tweets = (await redis.hscan('hashtweets', 0, 'match', `${req.query.keyword}*`))[1].filter(
+                key => Number.isInteger(Number(key))
+            );
+            const total = id_tweets.length;
+            const last_page = Math.ceil(total/per_page);
+            const tweets = [];
+            for(let i = from - 1; i < to; i++) {
+                const tweet = await redis.lindex('tweets', id_tweets[i]);
+                tweets.push(JSON.parse(tweet));
+            }
+            res.json({
+                total,
+                per_page,
+                current_page,
+                last_page,
+                first_page_url: `${fullUrl}?page=1&keyword=${req.query.keyword}`,
+                last_page_url: `${fullUrl}?page=${last_page}&keyword=${req.query.keyword}`,
+                next_page_url: current_page < last_page ? `${fullUrl}?page=${current_page + 1}&keyword=${req.query.keyword}` : null,
+                prev_page_url: current_page > 1 ? `${fullUrl}?page=${current_page - 1}&keyword=${req.query.keyword}` : null,
+                from,
+                to,
+                data: tweets,
+            });
+        } else {
+            res.status(303).json({message: 'keyword permited (platzi, node or opensource)'});
+        }
 
-        res.json({
-            total,
-            per_page,
-            current_page,
-            last_page,
-            first_page_url: `${fullUrl}?page=1`,
-            last_page_url: `${fullUrl}?page=${last_page}`,
-            next_page_url: current_page < last_page ? `${fullUrl}?page=${current_page + 1}` : null,
-            prev_page_url: current_page > 1 ? `${fullUrl}?page=${current_page - 1}` : null,
-            from,
-            to,
-            data: tweets,
-        });
+        
     } catch (error) {
         res.status(500).json({ error });
     }
