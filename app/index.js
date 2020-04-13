@@ -5,7 +5,7 @@ const port = 3000;
 
 app.get('/', (req, res) => res.send('Hello World! to you!'));
 
-app.get('/tweets', async (req, res) => {
+app.get('/api/tweets', async (req, res) => {
     try {
         const fullUrl = req.protocol + '://' + req.get('host') + url.parse(req.url).pathname;
         const current_page = req.query.page ? Number(req.query.page) : 1;
@@ -38,14 +38,13 @@ app.get('/tweets', async (req, res) => {
             });
         }
         else if(req.query.keyword && ['platzi','opensource', 'node'].includes(req.query.keyword)) {
-            const id_tweets = (await redis.hscan('hashtweets', 0, 'match', `${req.query.keyword}*`))[1].filter(
-                key => Number.isInteger(Number(key))
-            );
-            const total = id_tweets.length;
+            const id_tweets = (await redis.lrange(`tweets/${req.query.keyword}`, from - 1, to -1));
+            const total = await redis.llen(`tweets/${req.query.keyword}`);
             const last_page = Math.ceil(total/per_page);
             const tweets = [];
-            for(let i = from - 1; i < to; i++) {
-                const tweet = await redis.lindex('tweets', id_tweets[i]);
+            for(let i in id_tweets) {
+                console.log(id_tweets[i]);
+                const tweet = await redis.lindex('tweets', id_tweets[i] - 1);
                 tweets.push(JSON.parse(tweet));
             }
             
@@ -72,19 +71,6 @@ app.get('/tweets', async (req, res) => {
     } catch (error) {
         res.status(500).json({ error });
     }
-});
-
-app.get('/refactor', async (req, res) => {
-    const Redis = require('ioredis');
-    const redis = new Redis({host: 'redis'});
-
-    const tweets = (await redis.lrange('tweets', 0,-1)).map(tweet => JSON.parse(tweet));
-
-    for(let key in tweets) {
-        redis.hset('hashtweets', `${tweets[key].keyword}_${tweets[key].id}`, key);
-    }
-
-    res.send('finished refactoring')
 });
 
 app.listen(port, () => console.log(`Example app listening at http://localhost:${port}`));

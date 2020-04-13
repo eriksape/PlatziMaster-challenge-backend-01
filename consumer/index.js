@@ -35,7 +35,7 @@ amqp.connect('amqp://rabbitmq', function(error0, connection) {
         const tweet = JSON.parse(decode_utf8(msg.content.toString()));
         console.log(" [x] Received %s", tweet.id);
         redis.rpush('tweets', JSON.stringify(tweet)).then(index => {
-          redis.hset('hashtweets', `${tweet.keyword}_${tweet.id}`, index);
+          redis.rpush(`tweets/${tweet.keyword}`, index);
         });
       }, {
           noAck: true
