@@ -1,0 +1,22 @@
+{
+  "name": "challenge-backend-01-graphql",
+  "version": "0.0.0",
+  "description": "GraphQL implementation",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "nodemon ./index.js"
+  },
+  "author": "eriksape",
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.17.1",
+    "express-graphql": "^0.9.0",
+    "graphql": "^15.0.0",
+    "graphql-tools": "^4.0.7",
+    "ioredis": "^4.16.2"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.3"
+  }
+}

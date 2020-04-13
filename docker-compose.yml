@@ -10,6 +10,15 @@ services:
         command: /bin/sh -c "npm install && npm run dev"
         ports:
             - 3000:3000
+    app_graphql:
+        container_name: app_graphql_challenge_backend_01
+        image: node:12-alpine
+        working_dir: /var/www
+        volumes: 
+            - ./app_graphql:/var/www
+        command: /bin/sh -c "npm install && npm run dev"
+        ports:
+            - 3001:3000
     consumer:
         container_name: consumer_challenge_backend_01
         image: node:12-alpine
